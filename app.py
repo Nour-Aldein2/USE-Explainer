@@ -19,7 +19,7 @@ from lime.lime_text import LimeTextExplainer
 import plotly.express as px
 import plotly.graph_objects as go
 
-import text_processing
+# import text_processing
 
 weights = None
 markdown_text = '''
@@ -34,9 +34,11 @@ if this is your first introduction to Markdown!
 
 # Python
 # print("Start app!")
-df_train = text_processing.load_and_process_data("train.csv")
+# df_train = text_processing.load_and_process_data("train.csv")
+df_train = pd.read_csv("train.csv")
 # print("Got train data")
-df_test = text_processing.load_and_process_data("test.csv")
+# df_test = text_processing.load_and_process_data("test.csv")
+df_test = pd.read_csv("test.csv")
 # print("Got test data")
 class_names = ["Not Disaster", "Disaster"]
 explainer = LimeTextExplainer(class_names=class_names, verbose=False)
