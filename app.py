@@ -60,41 +60,41 @@ app.layout = dmc.NotificationsProvider(html.Div([dbc.Container([
     ## TODO: Add functionality to retrieve the data if there is an interesting point
     ## TODO: Make the histograms visually more appealing
     ## TODO: Add titles for each section of the dashboard (training, test, n-gram)
-    # ----------------------- Training Data
-    dbc.Row([
-        dbc.Col(
-            dbc.Container(
-                dbc.Card(
-                    html.Div(
-                        dbc.Table.from_dataframe(
-                            df_train[["id", "text", "target"]]),
-                        style={"maxHeight": "450px", "overflow": "scroll"},
-                    ), body=True,
-                ), className=["pt-4", "mt-4"], fluid=True), width={"size": 5, "order": "first"}
-        ),
-        dbc.Col(
-            html.Div([
-                dcc.Graph(id="train-hist")
-            ]), width={"size": 7, "order": "last"},
-        )
-    ]),
-    # ----------------------- Testing Data
-    dbc.Row([
-        dbc.Col(
-            dbc.Container(
-                dbc.Card(
-                    html.Div(
-                        dbc.Table.from_dataframe(df_test[["id", "text"]]),
-                        style={"maxHeight": "450px", "overflow": "scroll"},
-                    ), body=True,
-                ), className=["pt-4", "mt-4"], fluid=True), width={"size": 5, "order": "first"}
-        ),
-        dbc.Col(
-            html.Div([
-                dcc.Graph(id="test-hist")
-            ]), width={"size": 7, "order": "last"},
-        )
-    ]),
+#     # ----------------------- Training Data
+#     dbc.Row([
+#         dbc.Col(
+#             dbc.Container(
+#                 dbc.Card(
+#                     html.Div(
+#                         dbc.Table.from_dataframe(
+#                             df_train[["id", "text", "target"]]),
+#                         style={"maxHeight": "450px", "overflow": "scroll"},
+#                     ), body=True,
+#                 ), className=["pt-4", "mt-4"], fluid=True), width={"size": 5, "order": "first"}
+#         ),
+#         dbc.Col(
+#             html.Div([
+#                 dcc.Graph(id="train-hist")
+#             ]), width={"size": 7, "order": "last"},
+#         )
+#     ]),
+#     # ----------------------- Testing Data
+#     dbc.Row([
+#         dbc.Col(
+#             dbc.Container(
+#                 dbc.Card(
+#                     html.Div(
+#                         dbc.Table.from_dataframe(df_test[["id", "text"]]),
+#                         style={"maxHeight": "450px", "overflow": "scroll"},
+#                     ), body=True,
+#                 ), className=["pt-4", "mt-4"], fluid=True), width={"size": 5, "order": "first"}
+#         ),
+#         dbc.Col(
+#             html.Div([
+#                 dcc.Graph(id="test-hist")
+#             ]), width={"size": 7, "order": "last"},
+#         )
+#     ]),
     # ----------------------- N-Gram
     dbc.Row([
         dbc.Col([
@@ -220,32 +220,32 @@ app.layout = dmc.NotificationsProvider(html.Div([dbc.Container([
 # ===================
 
 
-# Dataframes
-@app.callback(
-    Output(component_id='train-hist', component_property='figure'),
-    Input(component_id='feature-selector', component_property='value')
-)
-def update_figure(feature):
-    fig_train = px.histogram(df_train, x=feature, marginal="box",
-                             color_discrete_sequence=['#417767'], template='plotly_white')
-    fig_train.update_layout(height=600, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                            margin=dict(l=0, r=0, b=0, t=10))
-    fig_train.update_yaxes(visible=False, showticklabels=False)
-    fig_train.update_xaxes(visible=False)
-    return fig_train
+# # Dataframes
+# @app.callback(
+#     Output(component_id='train-hist', component_property='figure'),
+#     Input(component_id='feature-selector', component_property='value')
+# )
+# def update_figure(feature):
+#     fig_train = px.histogram(df_train, x=feature, marginal="box",
+#                              color_discrete_sequence=['#417767'], template='plotly_white')
+#     fig_train.update_layout(height=600, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+#                             margin=dict(l=0, r=0, b=0, t=10))
+#     fig_train.update_yaxes(visible=False, showticklabels=False)
+#     fig_train.update_xaxes(visible=False)
+#     return fig_train
 
 
-@app.callback(
-    Output(component_id='test-hist', component_property='figure'),
-    Input(component_id='feature-selector', component_property='value')
-)
-def update_figure(feature):
-    fig_test = px.histogram(df_test, x=feature, marginal="box",
-                            color_discrete_sequence=['#774151'])
-    fig_test.update_layout(height=600, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                           margin=dict(l=0, r=0, b=15, t=0))
-    fig_test.update_yaxes(visible=False, showticklabels=False)
-    return fig_test
+# @app.callback(
+#     Output(component_id='test-hist', component_property='figure'),
+#     Input(component_id='feature-selector', component_property='value')
+# )
+# def update_figure(feature):
+#     fig_test = px.histogram(df_test, x=feature, marginal="box",
+#                             color_discrete_sequence=['#774151'])
+#     fig_test.update_layout(height=600, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+#                            margin=dict(l=0, r=0, b=15, t=0))
+#     fig_test.update_yaxes(visible=False, showticklabels=False)
+#     return fig_test
 
 
 # N-Gram update notification
