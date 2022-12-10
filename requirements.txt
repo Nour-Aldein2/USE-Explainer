@@ -10,11 +10,4 @@ keras
 plotly
 lime
 scikit-learn
-
-
-
-
-
-
-
-
+guicorn
