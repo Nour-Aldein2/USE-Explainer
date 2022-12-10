@@ -52,13 +52,13 @@ app.layout = dmc.NotificationsProvider(html.Div([dbc.Container([
     dbc.Row([
         dbc.Col(html.H1("Explaining USE with LIME"), width=12)
     ]),
-    dbc.Row([
-        dcc.Dropdown(
-            df_test.select_dtypes(include=np.number).columns[1:],  # Don't include ID
-            "char_count",
-            id="feature-selector"
-        ),
-    ]),
+#     dbc.Row([
+#         dcc.Dropdown(
+#             df_test.select_dtypes(include=np.number).columns[1:],  # Don't include ID
+#             "char_count",
+#             id="feature-selector"
+#         ),
+#     ]),
     ## TODO: Add functionality to retrieve the data if there is an interesting point
     ## TODO: Make the histograms visually more appealing
     ## TODO: Add titles for each section of the dashboard (training, test, n-gram)
