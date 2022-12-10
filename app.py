@@ -20,7 +20,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 import text_processing
-import visualizations as vis
 
 weights = None
 markdown_text = '''
@@ -44,7 +43,8 @@ explainer = LimeTextExplainer(class_names=class_names, verbose=False)
 
 BS = "https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
 app = dash.Dash(external_stylesheets=["assets/typography.css", BS])
-# print("created the app")
+
+server = app.server
 
 app.layout = dmc.NotificationsProvider(html.Div([dbc.Container([
     dbc.Row([
