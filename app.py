@@ -527,6 +527,7 @@ def explain_val(n_clicks, model_data, preds):
         return "", ""
 
 
-app.run(debug=True)
+if __name__ == '__main__':
+    app.run_server(debug=False)
 
 ## TODO: run the app with multiple workers so the callbacks can b executed in parallel
