@@ -19,7 +19,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 import text_processing
-import visualizations as vis
 
 weights = None
 markdown_text = '''
