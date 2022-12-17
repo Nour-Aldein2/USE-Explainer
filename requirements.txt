@@ -40,4 +40,4 @@ yolk3k==0.9
 zipp==3.11.0
 
 tensorflow==2.9.3
-
+gunicorn
