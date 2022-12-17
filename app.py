@@ -8,36 +8,66 @@ import dash_mantine_components as dmc
 import numpy as np
 import tensorflow as tf
 import tensorflow_hub as hub
+from tensorflow.keras import layers
+from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.layers.experimental.preprocessing import TextVectorization
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
+
 
 import lime
 from lime.lime_text import LimeTextExplainer
 
 import plotly.express as px
-import plotly.graph_objects as go
 
 import text_processing
 
 weights = None
-markdown_text = '''
-### Dash and Markdown
-
-Dash apps can be written in Markdown.
-Dash uses the [CommonMark](http://commonmark.org/)
-specification of Markdown.
-Check out their [60 Second Markdown Tutorial](http://commonmark.org/help/)
-if this is your first introduction to Markdown!
+md_project_intro = '''
+The goal of this dashboard is to provide an insight on how does an LSTM layer make predictions for \
+classification tasks. The task used in this dashboard is the famouse Kaggle cometition; classifying tweets \
+into disaster and not disaster. \n We start by vectorizing the text data using \
+`tf.keras.layers.TextVectorization` where we choose the size of the courpus is set to be 10000, and the \
+maximum length of the sequence length is 15 tokens. Finally, we fit the vectorizer to the training data \
+before we are able to use in the model. The next step is to prepare an embedding layer using \
+`tf.keras.layers.Embedding`.
+The user is able to view the data in tabular form, and see the distribution of different features extracted \
+from the text.
 '''
+md_n_gram = '''
+N-Gram takes sequence data (one word or more) as input, it then creates probablitiy distrubution of \
+the all the possible items, and then make a prediction based on the likelihood of each item. \
+In addiction to next-word prediction, N-Grams have other applications, such as language identification, \
+information retrieval, and predictions in DNA sequencing.\
+[[1]](https://deepai.org/machine-learning-glossary-and-terms/n-gram)
+'''
+md_model_description = '''
+We Design the model used in this dashboard using a vectorizer,an embedding layer, and LSTM layer, and an \
+output layer with two units and `softmax` as its activation function. Notice that we are using two units \
+and softmax instead of one layer and sigmoid activation function to be able to use the model to predictions \
+and compare them in a LIME instance. As a consequence of using classification layer in this way, the \
+loss function will Sparse Categorical Crossentropy instead of Binary Crossentropy.
 
+You will be able to train the model once, and then explore it's predictions, and the training process \
+after clicking on **Train LSTM Button**. In other words, this button will be disabled and a new one will \
+appear allowing the use to make predictions on the validation data. Once you click on 'Make Predictions' \
+button, more buttons will appear, each one will allow you to explore what the button's labels indicates.
 
+The last button that will appear is **Explain Predictions with LIME**, which you will be able to click on as \
+many times as you need. When you click on this button, the model will make a prediction and compare it with \
+the ground truth label. A notification will appear at the lower left corner of the window showing if the \
+model made a correct prediction or if it's miss classified it. Underneath the button you will see which words\
+affected the decision of the model, which will help you decide if you can trust such a model. Every time \
+you click on this button, a random prediction will be generated.
+'''
 
 # Python
 # print("Start app!")
 df_train = text_processing.load_and_process_data("train.csv")
 # print("Got train data")
 df_test = text_processing.load_and_process_data("test.csv")
+dropdown_ids_lst = df_test.select_dtypes(include=np.number).columns[1:].to_list()
+dropdown_ids = [{"label": " ".join(i.split("_")).title(), "value": i} for i in dropdown_ids_lst]
 # print("Got test data")
 class_names = ["Not Disaster", "Disaster"]
 explainer = LimeTextExplainer(class_names=class_names, verbose=False)
@@ -51,8 +81,9 @@ app.layout = dmc.NotificationsProvider(html.Div([dbc.Container([
         dbc.Col(html.H1("Explaining USE with LIME"), width=12)
     ]),
     dbc.Row([
+        dcc.Markdown(md_project_intro),
         dcc.Dropdown(
-            df_test.select_dtypes(include=np.number).columns[1:],  # Don't include ID
+            dropdown_ids,  # Don't include ID
             "char_count",
             id="feature-selector"
         ),
@@ -63,48 +94,26 @@ app.layout = dmc.NotificationsProvider(html.Div([dbc.Container([
     # ----------------------- Training Data
     dbc.Row([
         dbc.Col(
-            dbc.Container(
-                dbc.Card(
-                    html.Div(
-                        dbc.Table.from_dataframe(
-                            df_train[["id", "text", "target"]]),
-                        style={"maxHeight": "450px", "overflow": "scroll"},
-                    ), body=True,
-                ), className=["pt-4", "mt-4"], fluid=True), width={"size": 5, "order": "first"}
+            html.Div([
+                dmc.Button(
+                    "Show Five Random Tweets",
+                    id="show-random-train",
+                    color="gray",
+                    fullWidth=True
+                ),
+                html.Div(id='train-texts', style={'padding': '6% 0'})
+            ], style={"size": 6, 'padding': '3% 0'}),
         ),
         dbc.Col(
             html.Div([
                 dcc.Graph(id="train-hist")
-            ]), width={"size": 7, "order": "last"},
-        )
-    ]),
-    # ----------------------- Testing Data
-    dbc.Row([
-        dbc.Col(
-            dbc.Container(
-                dbc.Card(
-                    html.Div(
-                        dbc.Table.from_dataframe(df_test[["id", "text"]]),
-                        style={"maxHeight": "450px", "overflow": "scroll"},
-                    ), body=True,
-                ), className=["pt-4", "mt-4"], fluid=True), width={"size": 5, "order": "first"}
-        ),
-        dbc.Col(
-            html.Div([
-                dcc.Graph(id="test-hist")
-            ]), width={"size": 7, "order": "last"},
+            ]), width={"size": 6, "order": "last"},
         )
     ]),
     # ----------------------- N-Gram
     dbc.Row([
         dbc.Col([
-            dcc.Markdown('''
-                N-Gram takes sequence data (one word or more) as input, it then creates probablitiy distrubution of \
-                the all the possible items, and then make a prediction based on the likelihood of each item. \
-                In addiction to next-word prediction, N-Grams have other applications, such as language identification, \
-                information retrieval, and predictions in DNA sequencing.\
-                [[1]](https://deepai.org/machine-learning-glossary-and-terms/n-gram)
-            ''', style={'padding': '0 3%', 'textAlign': 'justify'}),
+            dcc.Markdown(md_n_gram, style={'padding': '0 3%', 'textAlign': 'justify'}),
             html.H6(["Choose The Class:"], style={'padding': '0 3%'}),
             dbc.RadioItems(
                 options=[
@@ -138,16 +147,21 @@ app.layout = dmc.NotificationsProvider(html.Div([dbc.Container([
             ], style={'padding': '1% 0'})
         ]),
         dbc.Col([
-            html.Div(id="notify-container"),
-            dcc.Graph(id="n-gram"),
+            dmc.LoadingOverlay(
+                dcc.Graph(id="n-gram"),
+                loaderProps={"variant": "bars", "color": "blue", "size": 100}
+            ),
         ], width={"order": "first"})
     ], style={'paddingTop': '5%'}),
     # ----------------------- Model
     dbc.Row([
-        dmc.Button(['Train LSTM Model'],
+        dcc.Markdown(md_model_description),
+        dmc.Button(['Train USE Model'],
                    id='train_model',
                    n_clicks=0,
                    disabled=False,
+                   # color="primary",
+                   # outline=True,
                    variant="gradient",
                    radius="xl",
                    gradient={"from": "teal", "to": "lime", "deg": 105}
@@ -199,6 +213,7 @@ app.layout = dmc.NotificationsProvider(html.Div([dbc.Container([
                    n_clicks=0,
                    variant="gradient",
                    radius="md",
+                   loading=True,
                    gradient={"from": "orange", "to": "lime", "deg": 105}
                    ),
         html.Div(id='show-lime-val'),
@@ -225,46 +240,34 @@ app.layout = dmc.NotificationsProvider(html.Div([dbc.Container([
 )
 def update_figure(feature):
     fig_train = px.histogram(df_train, x=feature, marginal="box",
-                             color_discrete_sequence=['#417767'], template='plotly_white')
-    fig_train.update_layout(height=600, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                            margin=dict(l=0, r=0, b=0, t=10))
-    fig_train.update_yaxes(visible=False, showticklabels=False)
-    fig_train.update_xaxes(visible=False)
+                             color_discrete_sequence=['#417767'],
+                             labels={feature: " ".join(feature.split("_")).title(), "count": "Count"})
+    fig_train.update_layout(height=600, paper_bgcolor='rgba(0,0,0,0)', # plot_bgcolor='rgba(0,0,0,0)',
+                            margin=dict(l=0, r=0, b=0, t=10),
+                            bargap=0.2,)
+    fig_train.update_yaxes(ticklabelposition="inside top")
     return fig_train
 
 
 @app.callback(
-    Output(component_id='test-hist', component_property='figure'),
-    Input(component_id='feature-selector', component_property='value')
-)
-def update_figure(feature):
-    fig_test = px.histogram(df_test, x=feature, marginal="box",
-                            color_discrete_sequence=['#774151'])
-    fig_test.update_layout(height=600, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                           margin=dict(l=0, r=0, b=15, t=0))
-    fig_test.update_yaxes(visible=False, showticklabels=False)
-    return fig_test
-
-
-# N-Gram update notification
-@app.callback(
-    Output(component_id='notify-container', component_property='children'),
     [
-        Input(component_id='phrases-num', component_property='value'),
-        Input(component_id='lower-bound', component_property='value'),
-        Input(component_id='upper-bound', component_property='value'),
-        Input(component_id='n-gram-class', component_property='value')
-    ]
+        Output(component_id="train-texts", component_property="children"),
+        Output(component_id="show-random-train", component_property="loading")
+    ],
+    Input(component_id="show-random-train", component_property="n_clicks"),
+    prevent_initial_call=True
 )
-def create_n_gram(phrases_num, lower, upper, class_name):
-    notification = dbc.Alert(
-        "Graph is updating, please wait.",
-        id="alert-auto",
-        is_open=True,
-        color="warning",
-        duration=4000,
-    )
-    return notification
+def get_train_texts(n_clicks):
+    if n_clicks > 0:
+        num = 5
+        samples = []
+        tweets = df_train.sample(n=num)
+        for i in range(num):
+            samples.append(f"**Random tweet {i+1}**: {tweets['text'].iloc[i]}")
+        markdown_train = "\n\n".join(samples)
+        return dcc.Markdown(markdown_train), False
+    else:
+        return "", False
 
 
 # N-Gram
@@ -312,7 +315,7 @@ def create_n_gram(phrases_num, lower, upper, class_name):
                      labels={"index": "Phrase", "value": "Count"},
                      orientation='h',
                      color_discrete_sequence=['#2A5470'])
-        fig.update_layout(showlegend=False, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+        fig.update_layout(showlegend=False, paper_bgcolor='rgba(0,0,0,0)', #plot_bgcolor='rgba(0,0,0,0)',
                           margin=dict(l=0, r=0, b=15, t=0))
         fig['layout']['yaxis']['autorange'] = "reversed"
 
@@ -344,7 +347,6 @@ def prepare_data(df_train, df_test):
     ],
     Input(component_id='train_model', component_property='n_clicks'),
     prevent_initial_call=True
-
 )
 def create_model(n_clicks):
     print("Preparing data")
@@ -480,7 +482,8 @@ def analyize_model(value, model_data, preds):
 @app.callback(
     [
         Output(component_id='show-lime-val', component_property='children'),
-        Output(component_id='show-pred-truth', component_property='children')
+        Output(component_id='show-pred-truth', component_property='children'),
+        Output(component_id='lime-val-button', component_property='loading')
     ],
     [
         Input(component_id='lime-val-button', component_property='n_clicks'),
@@ -491,17 +494,12 @@ def analyize_model(value, model_data, preds):
 )
 def explain_val(n_clicks, model_data, preds):
     if n_clicks > 0:
-        train_sentences, val_sentences, train_labels, val_labels = train_test_split(df_train["text"].to_numpy(),
-                                                                                    df_train["target"].to_numpy(),
-                                                                                    test_size=0.1,
-                                                                                    random_state=7)
+        train_sentences, val_sentences, train_labels, val_labels = prepare_data(df_train, df_test)
         model = tf.keras.models.model_from_json(model_data[0])
         model.set_weights(weights)
         preds = preds["predictions"]
         rng = np.random.RandomState(n_clicks + 132)
         idx = rng.choice(range(len(preds)))
-
-
         explain_pred = explainer.explain_instance(val_sentences[idx],
                                                   classifier_fn=model.predict,
                                                   labels=[val_labels[idx]])
@@ -518,7 +516,7 @@ def explain_val(n_clicks, model_data, preds):
                 action="show",
                 color='green',
                 icon=[DashIconify(icon="akar-icons:circle-check")],
-            )
+            ), False
         else:
             return html.Iframe(
                 srcDoc=explain_pred.as_html(),
@@ -532,11 +530,9 @@ def explain_val(n_clicks, model_data, preds):
                 action="show",
                 color='red',
                 icon=[DashIconify(icon="akar-icons:circle-x")],
-            )
+            ), False
     else:
-        return "", ""
+        return "", "", False
 
 
-app.run_server(host="0.0.0.0", port="7777", debug=True)
-
-## TODO: run the app with multiple workers so the callbacks can b executed in parallel
+app.run()
