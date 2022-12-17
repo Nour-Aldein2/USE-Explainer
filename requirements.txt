@@ -16,8 +16,8 @@ Flask
 lime==0.2.0.1
 Markdown==3.4.1
 MarkupSafe==2.1.1
-matplotlib==3.6.2
-matplotlib-inline==0.1.6
+matplotlib
+matplotlib-inline
 
 scikit-image
 scikit-learn
