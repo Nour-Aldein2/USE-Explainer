@@ -110,49 +110,49 @@ application.layout = dmc.NotificationsProvider(html.Div([dbc.Container([
             ]), width={"size": 6, "order": "last"},
         )
     ]),
-    # ----------------------- N-Gram
-    dbc.Row([
-        dbc.Col([
-            dcc.Markdown(md_n_gram, style={'padding': '0 3%', 'textAlign': 'justify'}),
-            html.H6(["Choose The Class:"], style={'padding': '0 3%'}),
-            dbc.RadioItems(
-                options=[
-                    {"label": "Disaster", "value": 1},
-                    {"label": "Not Disaster", "value": 0},
-                    # {"label": "Disabled Option", "value": 3, "disabled": True},
-                ],
-                value=1,
-                id="n-gram-class",
-                switch=True,
-                inline=True,
-                style={'padding': '0 3%'}
-            ),
-            html.H6(["Number of Phrases:"], style={'padding': '0 3%'}),
-            dcc.Slider(3, 20, 1,
-                       value=5,
-                       id="phrases-num"),
-            dbc.Row([
-                dbc.Col([
-                    html.H6(["Lower Boundary:"], style={'padding': '0 7%'}),
-                    dcc.Slider(1, 5, 1,
-                               value=1,
-                               id="lower-bound"),
-                ]),
-                dbc.Col([
-                    html.H6(["Upper Boundary:"], style={'padding': '0 7%'}),
-                    dcc.Slider(1, 7, 1,
-                               value=1,
-                               id="upper-bound")
-                ], width={"order": "last"}),
-            ], style={'padding': '1% 0'})
-        ]),
-        dbc.Col([
-            dmc.LoadingOverlay(
-                dcc.Graph(id="n-gram"),
-                loaderProps={"variant": "bars", "color": "blue", "size": 100}
-            ),
-        ], width={"order": "first"})
-    ], style={'paddingTop': '5%'}),
+#     # ----------------------- N-Gram
+#     dbc.Row([
+#         dbc.Col([
+#             dcc.Markdown(md_n_gram, style={'padding': '0 3%', 'textAlign': 'justify'}),
+#             html.H6(["Choose The Class:"], style={'padding': '0 3%'}),
+#             dbc.RadioItems(
+#                 options=[
+#                     {"label": "Disaster", "value": 1},
+#                     {"label": "Not Disaster", "value": 0},
+#                     # {"label": "Disabled Option", "value": 3, "disabled": True},
+#                 ],
+#                 value=1,
+#                 id="n-gram-class",
+#                 switch=True,
+#                 inline=True,
+#                 style={'padding': '0 3%'}
+#             ),
+#             html.H6(["Number of Phrases:"], style={'padding': '0 3%'}),
+#             dcc.Slider(3, 20, 1,
+#                        value=5,
+#                        id="phrases-num"),
+#             dbc.Row([
+#                 dbc.Col([
+#                     html.H6(["Lower Boundary:"], style={'padding': '0 7%'}),
+#                     dcc.Slider(1, 5, 1,
+#                                value=1,
+#                                id="lower-bound"),
+#                 ]),
+#                 dbc.Col([
+#                     html.H6(["Upper Boundary:"], style={'padding': '0 7%'}),
+#                     dcc.Slider(1, 7, 1,
+#                                value=1,
+#                                id="upper-bound")
+#                 ], width={"order": "last"}),
+#             ], style={'padding': '1% 0'})
+#         ]),
+#         dbc.Col([
+#             dmc.LoadingOverlay(
+#                 dcc.Graph(id="n-gram"),
+#                 loaderProps={"variant": "bars", "color": "blue", "size": 100}
+#             ),
+#         ], width={"order": "first"})
+#     ], style={'paddingTop': '5%'}),
     # ----------------------- Model
     dbc.Row([
         dcc.Markdown(md_model_description),
@@ -270,60 +270,60 @@ def get_train_texts(n_clicks):
         return "", False
 
 
-# N-Gram
-@application.callback(
-    [
-        Output(component_id='n-gram', component_property='figure'),
-        Output(component_id='upper-bound', component_property='disabled'),
-        Output(component_id='upper-bound', component_property='value'),
-    ],
-    [
-        Input(component_id='phrases-num', component_property='value'),
-        Input(component_id='lower-bound', component_property='value'),
-        Input(component_id='upper-bound', component_property='value'),
-        Input(component_id='n-gram-class', component_property='value')
-    ]
-)
-def create_n_gram(phrases_num, lower, upper, class_name):
-    if lower > upper:
-        upper = lower
-        target = text_processing.get_top_count_vectorizer(df_train,
-                                                          df_train["text"],
-                                                          ngram=(lower, upper),
-                                                          n=phrases_num)  # target_0, target_1
-        ## TODO: Fix condition for if the upper bound is larger the lower bound
-        fig = px.bar(target[class_name],
-                     labels={"index": "Phrase", "value": "Count"},
-                     orientation='h',
-                     color_discrete_sequence=['#2A5470'])
-        fig.update_layout(showlegend=False, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                          margin=dict(l=0, r=0, b=15, t=0))
-        fig['layout']['yaxis']['autorange'] = "reversed"
+# # N-Gram
+# @application.callback(
+#     [
+#         Output(component_id='n-gram', component_property='figure'),
+#         Output(component_id='upper-bound', component_property='disabled'),
+#         Output(component_id='upper-bound', component_property='value'),
+#     ],
+#     [
+#         Input(component_id='phrases-num', component_property='value'),
+#         Input(component_id='lower-bound', component_property='value'),
+#         Input(component_id='upper-bound', component_property='value'),
+#         Input(component_id='n-gram-class', component_property='value')
+#     ]
+# )
+# def create_n_gram(phrases_num, lower, upper, class_name):
+#     if lower > upper:
+#         upper = lower
+#         target = text_processing.get_top_count_vectorizer(df_train,
+#                                                           df_train["text"],
+#                                                           ngram=(lower, upper),
+#                                                           n=phrases_num)  # target_0, target_1
+#         ## TODO: Fix condition for if the upper bound is larger the lower bound
+#         fig = px.bar(target[class_name],
+#                      labels={"index": "Phrase", "value": "Count"},
+#                      orientation='h',
+#                      color_discrete_sequence=['#2A5470'])
+#         fig.update_layout(showlegend=False, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+#                           margin=dict(l=0, r=0, b=15, t=0))
+#         fig['layout']['yaxis']['autorange'] = "reversed"
 
-        if class_name == 0:
-            fig.update_layout(title="Class 0: Not a Disaster", title_font_color="green", title_x=0.5)
-        else:
-            fig.update_layout(title="Class 1: Disaster", title_font_color="red", title_x=0.5)
-        return fig, True, upper
-    else:
-        target = text_processing.get_top_count_vectorizer(df_train,
-                                                          df_train["text"],
-                                                          ngram=(lower, upper),
-                                                          n=phrases_num)  # target_0, target_1
-        ## TODO: Fix condition for if the upper bound is larger the lower bound
-        fig = px.bar(target[class_name],
-                     labels={"index": "Phrase", "value": "Count"},
-                     orientation='h',
-                     color_discrete_sequence=['#2A5470'])
-        fig.update_layout(showlegend=False, paper_bgcolor='rgba(0,0,0,0)', #plot_bgcolor='rgba(0,0,0,0)',
-                          margin=dict(l=0, r=0, b=15, t=0))
-        fig['layout']['yaxis']['autorange'] = "reversed"
+#         if class_name == 0:
+#             fig.update_layout(title="Class 0: Not a Disaster", title_font_color="green", title_x=0.5)
+#         else:
+#             fig.update_layout(title="Class 1: Disaster", title_font_color="red", title_x=0.5)
+#         return fig, True, upper
+#     else:
+#         target = text_processing.get_top_count_vectorizer(df_train,
+#                                                           df_train["text"],
+#                                                           ngram=(lower, upper),
+#                                                           n=phrases_num)  # target_0, target_1
+#         ## TODO: Fix condition for if the upper bound is larger the lower bound
+#         fig = px.bar(target[class_name],
+#                      labels={"index": "Phrase", "value": "Count"},
+#                      orientation='h',
+#                      color_discrete_sequence=['#2A5470'])
+#         fig.update_layout(showlegend=False, paper_bgcolor='rgba(0,0,0,0)', #plot_bgcolor='rgba(0,0,0,0)',
+#                           margin=dict(l=0, r=0, b=15, t=0))
+#         fig['layout']['yaxis']['autorange'] = "reversed"
 
-        if class_name == 0:
-            fig.update_layout(title="Class 0: Not a Disaster", title_font_color="green", title_x=0.5)
-        else:
-            fig.update_layout(title="Class 1: Disaster", title_font_color="red", title_x=0.5)
-        return fig, False, upper
+#         if class_name == 0:
+#             fig.update_layout(title="Class 0: Not a Disaster", title_font_color="green", title_x=0.5)
+#         else:
+#             fig.update_layout(title="Class 1: Disaster", title_font_color="red", title_x=0.5)
+#         return fig, False, upper
 
 
 # LSTM Model
