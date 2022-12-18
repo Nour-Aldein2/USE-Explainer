@@ -73,10 +73,10 @@ class_names = ["Not Disaster", "Disaster"]
 explainer = LimeTextExplainer(class_names=class_names, verbose=False)
 
 BS = "https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
-app = dash.Dash(external_stylesheets=["assets/typography.css", BS])
+application = dash.Dash(external_stylesheets=["assets/typography.css", BS])
 # print("created the app")
 
-app.layout = dmc.NotificationsProvider(html.Div([dbc.Container([
+application.layout = dmc.NotificationsProvider(html.Div([dbc.Container([
     dbc.Row([
         dbc.Col(html.H1("Explaining USE with LIME"), width=12)
     ]),
@@ -234,7 +234,7 @@ app.layout = dmc.NotificationsProvider(html.Div([dbc.Container([
 
 
 # Dataframes
-@app.callback(
+@application.callback(
     Output(component_id='train-hist', component_property='figure'),
     Input(component_id='feature-selector', component_property='value')
 )
@@ -249,7 +249,7 @@ def update_figure(feature):
     return fig_train
 
 
-@app.callback(
+@application.callback(
     [
         Output(component_id="train-texts", component_property="children"),
         Output(component_id="show-random-train", component_property="loading")
@@ -271,7 +271,7 @@ def get_train_texts(n_clicks):
 
 
 # N-Gram
-@app.callback(
+@application.callback(
     [
         Output(component_id='n-gram', component_property='figure'),
         Output(component_id='upper-bound', component_property='disabled'),
@@ -337,7 +337,7 @@ def prepare_data(df_train, df_test):
     return train_sentences, val_sentences, train_labels, val_labels
 
 
-@app.callback(
+@application.callback(
     [
         Output(component_id='model', component_property='data'),
         Output(component_id='train_model', component_property='disabled'),
@@ -395,7 +395,7 @@ def create_model(n_clicks):
 
 
 # Make Predictions
-@app.callback(
+@application.callback(
     [
         Output(component_id='predictions', component_property='data'),
         Output(component_id='understand-model', component_property='style'),
@@ -422,7 +422,7 @@ def make_prediction(n_clicks, model_data):
 
 
 # Analyze Model
-@app.callback(
+@application.callback(
     Output(component_id='display-training-results', component_property='children'),
     [
         Input(component_id='analyze-model', component_property='value'),
@@ -479,7 +479,7 @@ def analyize_model(value, model_data, preds):
 
 
 # Explain Predictions on Val
-@app.callback(
+@application.callback(
     [
         Output(component_id='show-lime-val', component_property='children'),
         Output(component_id='show-pred-truth', component_property='children'),
@@ -535,4 +535,4 @@ def explain_val(n_clicks, model_data, preds):
         return "", "", False
 
 
-app.run()
+application.run()
